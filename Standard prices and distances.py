@@ -31,7 +31,7 @@ def calculate_distances(polylines):
     j = 0 #counter to limit API requests
     
     with open('distances.txt', 'a') as taxi:
-        for i in range(1619, 5000):
+        for i in range(3656, 5656):
             # start = time.time()
             start_coords = (polylines[i][0][0], polylines[i][0][1])
             end_coords = (polylines[i][-1][0], polylines[i][-1][1])
