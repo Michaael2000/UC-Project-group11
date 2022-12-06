@@ -25,13 +25,14 @@ base_fee = 3.25
 kilometer_fee = 0.47
 
 def calculate_distances(polylines):
-    client = ors.Client(key='5b3ce3597851110001cf62483353a6afa13243d3b8d665e5739e02ff')
+    # client = ors.Client(key='5b3ce3597851110001cf62483353a6afa13243d3b8d665e5739e02ff') #old key
+    client = ors.Client(key='5b3ce3597851110001cf624803b6ba95c8524577852cabb54435acac') #new key
 
     distances = []
     j = 0 #counter to limit API requests
     
     with open('distances.txt', 'a') as taxi:
-        for i in range(7656, 9656):
+        for i in range(9045, 9656):
             # start = time.time()
             start_coords = (polylines[i][0][0], polylines[i][0][1])
             end_coords = (polylines[i][-1][0], polylines[i][-1][1])
@@ -49,7 +50,7 @@ def calculate_distances(polylines):
             # print(j)
             if j % 40 == 0: #sleep for 1 second after 40 API requests
                 time.sleep(60)
-#polylines [1323] [5148], eentje in de 1600, [6157] moeten nog
+#polylines [1323] [5148], eentje in de 1600, [6157] [9044] moeten nog
     # return distances
 
 polyline_july = df_july_firstweek['POLYLINE'].apply(ast.literal_eval)
