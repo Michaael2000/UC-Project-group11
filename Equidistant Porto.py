@@ -23,16 +23,18 @@ def create_grid(n):
     
     return divisionpoints # [top left, middle left, bottom left, top middle, middle middle, bottom middle, top right, middle right, bottom right]
 
-def assign_coordinates(n, divisionpoints, polylines):
+def assign_coordinates(n, divisionpoints, polylines, origin_or_destination):
+    trips = [0] * (n * n)
     for i in range(20000):
         
-        start_coords = (polylines[i][0][0], polylines[i][0][1])
+        if origin_or_destination is True:
+            coords = (polylines[i][0][0], polylines[i][0][1])
+        else:
+            coords = (polylines[i][-1][0], polylines[i][-1][1])
         # end_coords = (polylines[i][-1][0], polylines[i][-1][1])
         # coords = (start_coords, end_coords)
-        first_coord_index_data_entry = start_coords[0]
-        second_coord_index_data_entry = start_coords[1]
-
-        trips = [0] * (n * n)
+        first_coord_index_data_entry = coords[0]
+        second_coord_index_data_entry = coords[1]
 
         # The first column of the grid
         if first_coord_index_data_entry < divisionpoints[0][0]:
@@ -84,4 +86,6 @@ df_july_firstweek = pd.read_csv('df_july_firstweek.csv')
 polyline_july = df_july_firstweek['POLYLINE'].apply(ast.literal_eval)
 
 division_points = create_grid(4)
-demand = assign_coordinates(4, division_points, polyline_july)
+origin_or_destination = True
+demand = assign_coordinates(4, division_points, polyline_july, origin_or_destination)
+print(demand)
