@@ -4,8 +4,6 @@ import ast
 import math
 import numpy as np
 
-
-
 # print(type(start_coords[0]))
 
 shapefile_df = gpd.read_file("Shapefile/places.shp")
@@ -17,8 +15,7 @@ polyline_july = df_july_firstweek['POLYLINE'].apply(ast.literal_eval)
 
 
 def three_closest_points(loc_coord, polylines, origin_or_destination):
-
-    coord_list = [(x,y) for x,y in zip(loc_coord.x , loc_coord.y)]
+    coord_list = [(x, y) for x, y in zip(loc_coord.x, loc_coord.y)]
     demand = [0] * len(coord_list)
     # print(coord_list)
     for i in range(20000):
@@ -27,7 +24,7 @@ def three_closest_points(loc_coord, polylines, origin_or_destination):
             coords = (polylines[i][0][0], polylines[i][0][1])
         else:
             coords = (polylines[i][-1][0], polylines[i][-1][1])
-        
+
         for j in range(len(coord_list)):
             distances[j] = math.dist(coords, coord_list[j])
 
@@ -36,7 +33,8 @@ def three_closest_points(loc_coord, polylines, origin_or_destination):
         demand[top_three[1]] += 1
         demand[top_three[2]] += 1
 
-    return demand        
+    return demand
+
 
 origin_or_destination = True
 demand = three_closest_points(loc_coord, polyline_july, origin_or_destination)

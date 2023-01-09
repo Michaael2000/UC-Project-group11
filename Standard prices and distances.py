@@ -24,20 +24,21 @@ df_july_firstweek = pd.read_csv('df_july_firstweek.csv')
 base_fee = 3.25
 kilometer_fee = 0.47
 
+
 def calculate_distances(polylines):
     # client = ors.Client(key='5b3ce3597851110001cf62483353a6afa13243d3b8d665e5739e02ff') #old key
-    client = ors.Client(key='5b3ce3597851110001cf624803b6ba95c8524577852cabb54435acac') #new key
+    client = ors.Client(key='5b3ce3597851110001cf624803b6ba95c8524577852cabb54435acac')  # new key
 
     distances = []
-    j = 0 #counter to limit API requests
-    
+    j = 0  # counter to limit API requests
+
     with open('distances.txt', 'a') as taxi:
         for i in range(19177, 20016):
             # start = time.time()
             start_coords = (polylines[i][0][0], polylines[i][0][1])
             end_coords = (polylines[i][-1][0], polylines[i][-1][1])
             coords = (start_coords, end_coords)
-                
+
             route = client.directions(coords)
             # print(f"Program finished successfully in {time.time() - start} seconds")
             try:
@@ -48,17 +49,19 @@ def calculate_distances(polylines):
             # distances.append(route['routes'][0]['summary']['distance'])
             j += 1
             # print(j)
-            if j % 40 == 0: #sleep for 1 minute after 40 API requests
+            if j % 40 == 0:  # sleep for 1 minute after 40 API requests
                 time.sleep(60)
-#1616, 5148, 6158, 7182, 11167, 16915-16920, 17507, 17511, 17538, 17645, 19175
-    # return distances
+
+
+# 1616, 5148, 6158, 7182, 11167, 16915-16920, 17507, 17511, 17538, 17645, 19175
+# return distances
 
 polyline_july = df_july_firstweek['POLYLINE'].apply(ast.literal_eval)
 
 calculate_distances(polyline_july)
 
+
 def price_calculator(distance, demand_factor):
-    
     return base_fee + (kilometer_fee * demand_factor * distance)
 
 # df_july_firstweek = df_july_firstweek.assign(Trip_distance=distances)

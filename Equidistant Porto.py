@@ -1,6 +1,7 @@
 import pandas as pd
 import ast
 
+
 def create_grid(n):
     top_left_coordinates_porto = (-8.724049960449397, 41.27097898784837)
     top_right_coordinates_porto = (-8.460677040139723, 41.27097898784837)
@@ -9,7 +10,7 @@ def create_grid(n):
 
     divisionpoints = []
 
-    #determine division points in the city, for a 4x4 grid we have four division points
+    # determine division points in the city, for a 4x4 grid we have four division points
     city_length = top_right_coordinates_porto[0] - top_left_coordinates_porto[0]
     city_height = top_left_coordinates_porto[1] - bottom_left_coordinates_porto[1]
 
@@ -18,15 +19,17 @@ def create_grid(n):
 
     for i in range(n - 1):
         for j in range(n - 1):
-            divisionpoint = (top_left_coordinates_porto[0] + block_length + block_length * i, top_left_coordinates_porto[1] - block_height - block_height * j)
+            divisionpoint = (top_left_coordinates_porto[0] + block_length + block_length * i,
+                             top_left_coordinates_porto[1] - block_height - block_height * j)
             divisionpoints.append(divisionpoint)
-    
-    return divisionpoints # [top left, middle left, bottom left, top middle, middle middle, bottom middle, top right, middle right, bottom right]
+
+    return divisionpoints  # [top left, middle left, bottom left, top middle, middle middle, bottom middle, top right, middle right, bottom right]
+
 
 def assign_coordinates(n, divisionpoints, polylines, origin_or_destination):
     trips = [0] * (n * n)
     for i in range(20000):
-        
+
         if origin_or_destination is True:
             coords = (polylines[i][0][0], polylines[i][0][1])
         else:
@@ -81,6 +84,7 @@ def assign_coordinates(n, divisionpoints, polylines, origin_or_destination):
                 trips[15] += 1
 
     return trips
+
 
 df_july_firstweek = pd.read_csv('df_july_firstweek.csv')
 polyline_july = df_july_firstweek['POLYLINE'].apply(ast.literal_eval)
