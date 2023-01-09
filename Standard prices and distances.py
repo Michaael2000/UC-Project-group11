@@ -32,7 +32,7 @@ def calculate_distances(polylines):
     j = 0 #counter to limit API requests
     
     with open('distances.txt', 'a') as taxi:
-        for i in range(19177, 20016):
+        for i in range(20038):
             # start = time.time()
             start_coords = (polylines[i][0][0], polylines[i][0][1])
             end_coords = (polylines[i][-1][0], polylines[i][-1][1])
@@ -50,7 +50,7 @@ def calculate_distances(polylines):
             # print(j)
             if j % 40 == 0: #sleep for 1 minute after 40 API requests
                 time.sleep(60)
-#1616, 5148, 6158, 7182, 11167, 16915-16920, 17507, 17511, 17538, 17645, 19175
+#1616, 5148, 6158, 7182, 11167, 16915-16920, 17507, 17511, 17538, 17645, 19175, 19176
     # return distances
 
 polyline_july = df_july_firstweek['POLYLINE'].apply(ast.literal_eval)

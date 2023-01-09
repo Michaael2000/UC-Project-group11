@@ -25,7 +25,7 @@ def create_grid(n):
 
 def assign_coordinates(n, divisionpoints, polylines, origin_or_destination):
     trips = [0] * (n * n)
-    for i in range(20000):
+    for i in range(20038):
         
         if origin_or_destination is True:
             coords = (polylines[i][0][0], polylines[i][0][1])

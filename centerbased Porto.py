@@ -21,7 +21,7 @@ def three_closest_points(loc_coord, polylines, origin_or_destination):
     coord_list = [(x,y) for x,y in zip(loc_coord.x , loc_coord.y)]
     demand = [0] * len(coord_list)
     # print(coord_list)
-    for i in range(20000):
+    for i in range(20038):
         distances = [0] * len(coord_list)
         if origin_or_destination is True:
             coords = (polylines[i][0][0], polylines[i][0][1])
