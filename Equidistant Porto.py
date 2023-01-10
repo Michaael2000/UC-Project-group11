@@ -1,5 +1,12 @@
-import pandas as pd
 import ast
+import math
+import datetime
+import pandas as pd
+
+price_range = 0.5
+standard_price = 0.47
+max_price = standard_price * (1 + price_range)
+max_p_sqrd = math.pow(max_price, 2)
 
 
 def create_grid(n):
@@ -26,10 +33,18 @@ def create_grid(n):
     return divisionpoints  # [top left, middle left, bottom left, top middle, middle middle, bottom middle, top right, middle right, bottom right]
 
 
-def assign_coordinates(n, divisionpoints, polylines, origin_or_destination):
+def assign_coordinates(n, divisionpoints, polylines, timestamps, origin):
     trips = [0] * (n * n)
+    res = []
+    previous_t = 0
     for i in range(20038):
-        if origin_or_destination is True:
+        current_timestamp = timestamps[i]
+        current_t = current_timestamp.hour
+        if current_t > previous_t:
+            res.append(trips)
+            trips = [0] * (n * n)
+
+        if origin:
             coords = (polylines[i][0][0], polylines[i][0][1])
         else:
             coords = (polylines[i][-1][0], polylines[i][-1][1])
@@ -82,13 +97,109 @@ def assign_coordinates(n, divisionpoints, polylines, origin_or_destination):
             else:
                 trips[15] += 1
 
-    return trips
+        previous_t = current_t
+
+    return res
 
 
-df_july_firstweek = pd.read_csv('df_july_firstweek.csv')
-polyline_july = df_july_firstweek['POLYLINE'].apply(ast.literal_eval)
+# Cumulative Distribution Function (Fw & Fr)
+def F(price):
+    return math.pow(price, 2) / math.pow(max_price, 2)
 
-division_points = create_grid(4)
-origin_or_destination = True
-demand = assign_coordinates(4, division_points, polyline_july, origin_or_destination)
-print(demand)
+
+# Demand
+def D(r, price):
+    return r * (1 - F(price))
+
+
+def Dinv(r, demand):
+    return math.sqrt(max_p_sqrd*(1 - (demand / r)))
+
+
+# Supply
+def S(v, price):
+    return v * F(price)
+
+
+def T(r, v, p):
+    return min(D(r, p), S(v, p))
+
+
+def revIncrease(r, v, r1, v1):
+    pc = calculateClearingPrice(r, v)
+    pc1 = calculateClearingPrice(r1, v1)
+    return S(v1, pc1) * pc1 - S(v, pc) * pc
+
+
+def calculateClearingPrice(r, v):
+    return math.sqrt((r * max_p_sqrd) / (v + r))
+
+
+def localOptimization(r, v):
+    clearingPrice = calculateClearingPrice(r, v)  # Pc D(p) = S(p)
+    maxDemandPrice = math.sqrt(max_p_sqrd / 3)  # Maximizes D(p) * p -> Pd
+    # print("Pd", maxDemandPrice)
+    # print("Pc", clearingPrice)
+
+    if maxDemandPrice <= clearingPrice:
+        return clearingPrice
+    else:
+        return maxDemandPrice
+
+
+def revDecrease(r, pti):
+    price_change = (pti - standard_price) / standard_price
+    adjusted_r = r + price_change * r
+    revdecrease = r * standard_price - pti * adjusted_r
+    return revdecrease, adjusted_r
+
+
+def PPricing(t, r, v):
+    """
+    Input: Rti, Vti & R(t+1)j
+    Output: p*ti, optimal price at time t
+    """
+    revDec = []
+    adjusted_rs = []
+    revInc = []
+    n = 16
+    for i in range(n):
+        if r[t][i] == 0 and v[t][i] == 0:
+            revDec.append(0)
+            adjusted_rs.append(0)
+            continue
+        pti = localOptimization(r[t][i], v[t][i])
+        res1, res2 = revDecrease(r[t][i], pti)
+        revDec.append(res1)
+        adjusted_rs.append(res2)
+    for j in range(n):
+        if adjusted_rs[j] == 0 and v[t][j] == 0 or r[t + 1][j] == 0 and v[t + 1][j] == 0:
+            revInc.append(0)
+            continue
+        revInc.append(revIncrease(adjusted_rs[j], v[t][j], r[t + 1][j], v[t + 1][j]))
+
+    sigmaInc = sum(revInc)
+    sigmaDec = sum(revDec)
+    return sigmaInc - sigmaDec
+
+
+if __name__ == "__main__":
+    # dists = pd.read_csv('distances.txt', sep="\n", header=None)
+    # dists.columns = ["DISTANCE"]
+    df_july_firstweek = pd.read_csv('df_july_firstweek_short.csv')
+    # df_july_firstweek["DISTANCE"] = dists["DISTANCE"]
+    df_july_firstweek["TIMESTAMP"] = df_july_firstweek["TIMESTAMP"].apply(datetime.datetime.fromtimestamp)
+    df_july_firstweek.sort_values(by=['TIMESTAMP'], ignore_index=True, inplace=True)
+    polylines = df_july_firstweek['POLYLINE'].apply(ast.literal_eval)
+    timestamps = df_july_firstweek['TIMESTAMP']
+    data_points = 20038
+
+    division_points = create_grid(4)
+    demand = assign_coordinates(4, division_points, polylines, timestamps, True)
+    supply = assign_coordinates(4, division_points, polylines, timestamps, False)
+    l = []
+    for t in range(1, 15):
+        l.append(PPricing(t, demand, supply))
+    print(sum(l))
+
+
